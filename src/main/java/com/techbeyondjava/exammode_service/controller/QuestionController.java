@@ -1,6 +1,5 @@
 package com.techbeyondjava.exammode_service.controller;
 
-import com.techbeyondjava.exammode_service.dto.ExamModeDto;
 import com.techbeyondjava.exammode_service.dto.QuestionDto;
 import com.techbeyondjava.exammode_service.dto.QuestionsCriteria;
 import com.techbeyondjava.exammode_service.model.Question;
@@ -8,7 +7,10 @@ import com.techbeyondjava.exammode_service.service.QuestionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -22,13 +24,10 @@ public class QuestionController {
     QuestionService questionService;
 
     @PostMapping("/getExamModeQuestions")
-    public List<Question> getExamModeQuestions(@RequestBody QuestionsCriteria questionsCriteria) {
+    public List<QuestionDto> getExamModeQuestions(@RequestBody QuestionsCriteria questionsCriteria) {
         logger.info("Called getExamModeQuestions, questionsCriteria : {}", questionsCriteria);
-        List<Question> questionList = questionService.getExamModeQuestions(questionsCriteria);
-        logger.info("questionList : {}", questionList);
-        return questionList;
+        return questionService.getExamModeQuestions(questionsCriteria);
     }
-
 
 
     @PostMapping("/evaluateExam")
