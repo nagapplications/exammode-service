@@ -3,9 +3,11 @@ package com.techbeyondjava.exammode_service.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
-public class QuestionDto {
+public class QuestionDto implements Serializable {
 
     private long id;
     private String Question;
