@@ -44,7 +44,8 @@ public class QuestionController {
         logger.info("Called evaluateExam, examModeDto : {}", qstnAnsMap);
         Map<Integer, Long> storedQstnMap = (Map<Integer, Long>) httpSession.getAttribute("qstnNumMap");
 
-
+        int rightAnswerCount = 0;
+        String result = "";
         for (Map.Entry<Integer, String> entry : qstnAnsMap.entrySet()) {
             Integer qstnNo = entry.getKey();
             String optionChoosen = entry.getValue();
@@ -54,12 +55,15 @@ public class QuestionController {
             List<Question> storedQuestionDtoList = (List<Question>) httpSession.getAttribute("questionList");
             Optional<Question> questionOpt = storedQuestionDtoList.stream().filter(e -> e.getId() == storedQstnNo.intValue()).findFirst();
             Question question = questionOpt.get();
-
-            logger.info("QstNo : {}, OptionChoosen : {} is a {}", qstnNo, optionChoosen, (question.getRightAnswer().equalsIgnoreCase(optionChoosen)) ? "Right Answer" : "Wrong Answer, Right Answer is : " + question.getRightAnswer());
+            if (question.getRightAnswer().equalsIgnoreCase(optionChoosen)) {
+                ++rightAnswerCount;
+            }
+            //logger.info("QstNo : {}, OptionChoosen : {} is a {}", qstnNo, optionChoosen, (question.getRightAnswer().equalsIgnoreCase(optionChoosen)) ? "Right Answer" : "Wrong Answer, Right Answer is : " + question.getRightAnswer());
+            result = rightAnswerCount + "/" + storedQstnMap.size();
 
 
         }
-
+        logger.info("SCORE = {}, PERCENTAGE = {}%", result, Math.round(((float) rightAnswerCount / storedQstnMap.size()) * 100));
 
         return null;
     }
