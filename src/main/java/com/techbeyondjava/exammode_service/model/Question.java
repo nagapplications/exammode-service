@@ -10,6 +10,9 @@ import java.util.Date;
 @Entity
 public class Question implements Serializable {
 
+    @Column(name = "serial_no", nullable = false)
+    private long serialNo;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -40,6 +43,7 @@ public class Question implements Serializable {
 
     @Transient
     private Date createdDate;
+
     @Transient
     private Date modifiedDate;
 }

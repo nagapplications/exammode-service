@@ -63,7 +63,7 @@ public class QuestionController {
 
 
         }
-        logger.info("SCORE = {}, PERCENTAGE = {}%", result, Math.round(((float) rightAnswerCount / storedQstnMap.size()) * 100));
+        logger.info("SCORE = {} PERCENTAGE = {}%", result, Math.round(((float) rightAnswerCount / storedQstnMap.size()) * 100));
 
         return null;
     }

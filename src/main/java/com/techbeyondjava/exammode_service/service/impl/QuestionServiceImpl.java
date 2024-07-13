@@ -32,6 +32,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionDto> getExamModeQuestions(QuestionsCriteria questionsCriteria) {
         logger.info("Called getAllQuestions...{}####@ = {}", questionsCriteria, Util.passNullIfAll(questionsCriteria.getDifficultyLevel()));
         List<Question> questionList = questionDao.getExamModeQuestions(Util.passNullIfAll(questionsCriteria.getTopic()), Util.passNullIfAll(questionsCriteria.getDifficultyLevel()), questionsCriteria.getNoOfQuestions());
+        logger.info("****{}",questionList);
         httpSession.setAttribute("questionList", questionList);
         return extractDataForFrontEnd(questionList);
     }
