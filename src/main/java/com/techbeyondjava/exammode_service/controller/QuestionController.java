@@ -1,21 +1,23 @@
 package com.techbeyondjava.exammode_service.controller;
 
 import com.techbeyondjava.exammode_service.dto.QuestionDto;
+import com.techbeyondjava.exammode_service.dto.QuestionDtoWrapper;
 import com.techbeyondjava.exammode_service.dto.QuestionsCriteria;
 import com.techbeyondjava.exammode_service.model.Question;
 import com.techbeyondjava.exammode_service.service.QuestionService;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000"}, allowedHeaders = "*", allowCredentials = "true")
@@ -40,32 +42,36 @@ public class QuestionController {
 
 
     @PostMapping("/evaluateExam")
-    public List<Question> evaluateExam(@RequestBody Map<Integer, String> qstnAnsMap) {
-        logger.info("Called evaluateExam, examModeDto : {}", qstnAnsMap);
-        Map<Integer, Long> storedQstnMap = (Map<Integer, Long>) httpSession.getAttribute("qstnNumMap");
-
+    public QuestionDtoWrapper evaluateExam(@RequestBody List<QuestionDto> questionDtoList) {
+        logger.info("Called evaluateExam, questionDtoList : {}", questionDtoList);
+        //TODO : MOVE CODE TO SERVICE
         int rightAnswerCount = 0;
-        String result = "";
-        for (Map.Entry<Integer, String> entry : qstnAnsMap.entrySet()) {
-            Integer qstnNo = entry.getKey();
-            String optionChoosen = entry.getValue();
+        List<Question> questionList = (List<Question>) httpSession.getAttribute("questionList");
 
-            Long storedQstnNo = storedQstnMap.get(qstnNo);
+        Iterator<Question> questionListItr = questionList.iterator();
+        Iterator<QuestionDto> questionDtoListItr = questionDtoList.iterator();
+        List<QuestionDto> evaludatedQuestionDtoList = new ArrayList<>();
+        while (questionListItr.hasNext() && questionDtoListItr.hasNext()) {
+            Question questionItem = questionListItr.next();
+            QuestionDto questionDtoItem = questionDtoListItr.next();
+            BeanUtils.copyProperties(questionItem, questionDtoItem);
+            evaludatedQuestionDtoList.add(questionDtoItem);
 
-            List<Question> storedQuestionDtoList = (List<Question>) httpSession.getAttribute("questionList");
-            Optional<Question> questionOpt = storedQuestionDtoList.stream().filter(e -> e.getId() == storedQstnNo.intValue()).findFirst();
-            Question question = questionOpt.get();
-            if (question.getRightAnswer().equalsIgnoreCase(optionChoosen)) {
-                ++rightAnswerCount;
+            if (questionItem.getSerialNo() == questionDtoItem.getSerialNo() &&
+                    questionItem.getRightAnswer().equalsIgnoreCase(questionDtoItem.getChoosenAnswer())) {
+                rightAnswerCount += 1;
             }
-            //logger.info("QstNo : {}, OptionChoosen : {} is a {}", qstnNo, optionChoosen, (question.getRightAnswer().equalsIgnoreCase(optionChoosen)) ? "Right Answer" : "Wrong Answer, Right Answer is : " + question.getRightAnswer());
-            result = rightAnswerCount + "/" + storedQstnMap.size();
-
-
         }
-        logger.info("SCORE = {} PERCENTAGE = {}%", result, Math.round(((float) rightAnswerCount / storedQstnMap.size()) * 100));
+        logger.info("Evaluated QuestionDtoList {}", evaludatedQuestionDtoList);
 
-        return null;
+        QuestionDtoWrapper questionDtoWrapper = new QuestionDtoWrapper();
+        questionDtoWrapper.setQuestionDtoList(evaludatedQuestionDtoList);
+        String score = String.format("SCORE = %s out of %s,  PERCENTAGE = %s", rightAnswerCount, questionList.size(), Math.round(((float) rightAnswerCount / questionList.size()) * 100));
+        logger.info("SCORE = {}",score);
+        questionDtoWrapper.setScorePercentageStatus(score);
+
+
+        return questionDtoWrapper;
     }
 
 }
